@@ -34,12 +34,12 @@ def create_test_file():
 def client(create_test_file):
     record_1 = {'id': 1, 'recipe_cuisine': 'british'}
     record_3 = {'id': 2, 'recipe_cuisine': 'nothello'}
-    record_2 = {'id': 5, 'recipe_cuisine': 'british'}
-    record_4 = {'id': 5, 'recipe_cuisine': 'british'}
     record_5 = {'id': 3, 'recipe_cuisine': 'british'}
+    record_2 = {'id': 4, 'recipe_cuisine': 'british'}
+    record_4 = {'id': 5, 'recipe_cuisine': 'british'}
     file_path = create_test_file(['id', 'recipe_cuisine'], [record_1, record_2, record_3, record_4, record_5])
 
-    app = create_app({'RECIPE_DATA_FILE_PATH': file_path, 'PAGINATION_LIMIT' : 2})
+    app = create_app({'RECIPE_DATA_FILE_PATH': file_path, 'PAGINATION_LIMIT': 2})
     app.config['TESTING'] = True
     client = app.test_client()
 
@@ -57,4 +57,45 @@ def test_a_user_can_retrieve_a_retrieve_a_paginated_list_of_recipes(client):
 
     for record in data['data']:
         assert record['recipe_cuisine'] == 'british'
+
+
+def test_a_user_can_get_a_page_of_recipes(client):
+    query = '?recipe_cuisine=british'
+
+    response = client.get('/recipes/show/2' + query)
+
+    data = json.loads(response.get_data(as_text=True))
+
+    assert len(data['data']) == 2
+
+    for record in data['data']:
+        assert record['recipe_cuisine'] == 'british'
+
+
+def test_a_user_can_get_a_recipe_by_id(client):
+    response = client.get('/recipes/2')
+
+    data = json.loads(response.get_data(as_text=True))
+
+    assert data['id'] == 2
+
+
+def test_a_user_can_update_a_recipe_by_id_and_returns_correct_value(client):
+    new_recipe_cuisine = 'new_recipe_cuisine'
+    response = client.patch('/recipes/2', json=dict(recipe_cuisine=new_recipe_cuisine))
+
+    data = json.loads(response.get_data(as_text=True))
+
+    assert data['id'] == 2
+    assert data['recipe_cuisine'] == new_recipe_cuisine
+
+
+def test_a_user_can_store_a_new_recipe(client):
+    response = client.post('/recipes', json=dict(carbs_grams=2, recipe_cuisine='asian'))
+
+    data = json.loads(response.get_data(as_text=True))
+
+    assert data['id'] == 6
+    assert data['recipe_cuisine'] == 'asian'
+    assert data['carbs_grams'] == 2
 

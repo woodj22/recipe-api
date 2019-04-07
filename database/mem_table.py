@@ -4,7 +4,7 @@ from typing import Optional, List, Any
 
 class MemTable:
     query: List[Optional[Any]]
-    memory_list: dict
+    memory_list: list
 
     def __init__(self, memory_list):
         self.memory_list = memory_list[1:]
@@ -53,6 +53,27 @@ class MemTable:
             paginationDict['pagination']['prevPage'] = 'recipes/page/' + str(page - 1)
 
         return paginationDict
+
+    def update(self, index, params: dict):
+        new_row = self.find(index)
+        for filter_key, filter_value in params.items():
+            if filter_key in new_row:
+                new_row[filter_key] = filter_value
+
+        self.memory_list[index] = new_row
+
+        return new_row
+
+    def store(self, params: dict):
+        id = self._get_next_id()
+        params['id'] = id
+
+        self.memory_list.append(params)
+        print(self.memory_list)
+        return params
+
+    def _get_next_id(self):
+        return len(self.memory_list) + 1
 
 class Pagination(object):
 
