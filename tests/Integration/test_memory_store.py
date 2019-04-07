@@ -44,6 +44,22 @@ def test_mem_table_can_retrieve_a_record_by_id(create_test_file):
     recipes = MemTable(memory)
 
     result = recipes.find(1)
-    assert list(record_2.values()) == list(result.values())
+    assert list(record_1.values()) == list(result.values())
+
+
+def test_mem_table_can_retrieve_an_indexed_list_of_records(create_test_file):
+    field_names = ['id', 'bullet_2']
+    record_1 = {'id': 1, 'bullet_2': 'egd'}
+    record_2 = {'id': 2, 'bullet_2': 'esdsgd'}
+    record_3 = {'id': 3, 'bullet_2': 'versdfgv'}
+    file_path = create_test_file(field_names, [record_1, record_2, record_3])
+
+    memory = csv_loader(file_path)
+
+    recipes = MemTable(memory)
+
+    result = recipes.list()
+
+    assert [record_1, record_2, record_3] == result
 
 
