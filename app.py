@@ -54,4 +54,24 @@ def create_app(test_config=None):
         params = request.get_json()
         return json.dumps(recipe_model.store(params))
 
+    @app.route('/recipes/<int:id>/ratings', methods=['put'])
+    def update_rating(id):
+        existing_model = recipe_model.find(id)
+        rating_count = existing_model['rating_count']
+
+        average_rating = _calculate_average_rating(existing_model['average_rating'], existing_model['rating_count'],
+                                                   request.get_json()['rating'])
+
+        new_params = {'average_rating': average_rating, 'rating_count': rating_count + 1}
+
+        updated_recipe = recipe_model.update(id, new_params)
+        return json.dumps(updated_recipe)
+
+    def _calculate_average_rating(current_avg_rating, current_rating_count, new_rating):
+        rating_total = (current_avg_rating * current_rating_count) + new_rating
+
+        average_rating = rating_total / (current_rating_count + 1)
+
+        return average_rating
+
     return app
