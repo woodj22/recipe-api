@@ -1,13 +1,19 @@
 import csv
 
 
-def csv(input_path):
+def csv_loader(input_path) -> list:
     with open(input_path, newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        print(reader)
-        # for row in reader:
+        memory = csv.DictReader(csvfile, delimiter=',')
 
-            # print(row['first_name'], row['last_name'])
+        memory_list = []
+        for row in memory:  # read a row as {column1: value1, column2: value2,...}
+            typed_value = {}
+            for (k, v) in row.items():  # go over each column name and value
+                try:
+                    typed_value[k] = int(v)
+                except ValueError:
+                    typed_value[k] = v
 
+            memory_list.append(typed_value)
 
-    return 'hello world'
+    return memory_list

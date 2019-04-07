@@ -1,10 +1,8 @@
 import csv
 import os
-
 from database.filetypes import csv_loader
 import pytest
-from faker import Faker
-fake = Faker()
+from database.mem_table import MemTable
 
 
 @pytest.fixture
@@ -21,7 +19,7 @@ def create_test_file():
 
     yield _create_test_file
 
-    os.remove(test_csv_file_path)
+    os.unlink(test_csv_file_path)
 
 
 def test_csv_loader_can_load_a_csv_into_memory(create_test_file):
@@ -31,12 +29,21 @@ def test_csv_loader_can_load_a_csv_into_memory(create_test_file):
 
     mem = csv_loader(file_path)
 
-    assert list(actual_dict.values()) == mem[1]
+    assert list(actual_dict.values()) == list(mem[0].values())
 
 
 def test_mem_table_can_retrieve_a_record_by_id(create_test_file):
     field_names = ['id', 'bullet_2']
     record_1 = {'id': 1, 'bullet_2': 'egd'}
-    record_2 = {'id': 2, 'bullet_2': 'egd'}
-    file_path = create_test_file(field_names, [record_1, record_2])
-    assert 1 == 1
+    record_2 = {'id': 2, 'bullet_2': 'esdsgd'}
+    record_3 = {'id': 3, 'bullet_2': 'versdfgv'}
+    file_path = create_test_file(field_names, [record_1, record_2, record_3])
+
+    memory = csv_loader(file_path)
+
+    recipes = MemTable(memory)
+
+    result = recipes.find(1)
+    assert list(record_2.values()) == list(result.values())
+
+
