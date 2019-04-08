@@ -29,7 +29,6 @@ def create_test_file():
     os.unlink(test_csv_file_path)
 
 
-
 @pytest.fixture
 def client(create_test_file):
     file_path = create_test_file(test_csv_file_path, ['id', 'recipe_cuisine', 'average_rating', 'rating_count'],
@@ -41,16 +40,6 @@ def client(create_test_file):
     client = app.test_client()
 
     yield client
-
-
-def test_a_user_can_see_the_second_page_of_pagination(client):
-    response = client.get('/recipes/page/2')
-
-    data = json.loads(response.get_data(as_text=True))
-
-    assert len(data['data']) == 2
-    assert 'nextPage' in data['pagination']
-    assert 'prevPage' in data['pagination']
 
 
 def test_a_user_can_retrieve_a_paginated_list_of_recipes_without_a_filter(client):
@@ -99,6 +88,16 @@ def test_a_user_can_filter_by_recipe_cuisine(client):
         assert record['recipe_cuisine'] == 'british'
 
 
+def test_a_user_can_see_the_second_page_of_pagination(client):
+    response = client.get('/recipes/page/2?per_page=2')
+    print(response.get_data(as_text=True))
+    data = json.loads(response.get_data(as_text=True))
+
+    assert len(data['data']) == 2
+    assert 'nextPage' in data['pagination']
+    assert 'prevPage' in data['pagination']
+
+
 def test_a_user_can_get_a_recipe_by_id(client):
     response = client.get('/recipes/2')
 
@@ -130,10 +129,10 @@ def test_a_user_can_store_a_new_recipe(client):
     assert response.status_code == 201
 
 
-def test_a_user_can_add_a_rating_and_returns_recipe_with_new_average(client):
+def test_a_user_can_add_a_rating_and_returns_recipe_with_new_average_rating(client):
     avg_rating = 3
     rating_count = 2
-    response = client.put('/recipes/2/ratings', json=dict(rating=5))
+    response = client.post('/recipes/2/ratings', json=dict(rating=5))
 
     rating_total = avg_rating * rating_count
 
@@ -147,13 +146,19 @@ def test_a_user_can_add_a_rating_and_returns_recipe_with_new_average(client):
     assert data['rating_count'] == expected_rating_count
 
 
-def test_a_user_cannot_add_a_rating_over_5_by_returnig_403(client):
-    response = client.put('/recipes/2/ratings', json=dict(rating=6))
+def test_a_user_cannot_add_a_rating_over_5_by_returning_403(client):
+    response = client.post('/recipes/2/ratings', json=dict(rating=6))
 
     assert response.status_code == 403
 
 
-def test_a_user_cannot_add_a_rating_under_0_by_returnig_403(client):
-    response = client.put('/recipes/2/ratings', json=dict(rating=-1))
+def test_a_user_cannot_add_a_rating_under_0_by_returning_403(client):
+    response = client.post('/recipes/2/ratings', json=dict(rating=-1))
 
     assert response.status_code == 403
+
+
+def test_a_user_cannot_add_send_an_empty_rating(client):
+    response = client.post('/recipes/2/ratings')
+
+    assert response.status_code == 400

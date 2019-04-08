@@ -64,15 +64,22 @@ def create_app(test_config=None):
 
         return json.dumps(recipe_model.store(params)), 201
 
-    @app.route('/recipes/<int:id>/ratings', methods=['put'])
+    @app.route('/recipes/<int:id>/ratings', methods=['post'])
     def update_rating(id):
         existing_model = recipe_model.find(id)
-        rating_count = existing_model['rating_count']
+
+        try:
+            request.get_json()['rating']
+        except TypeError:
+            return '', 400
 
         if request.get_json()['rating'] > 5 or request.get_json()['rating'] < 0:
             return '', 403
 
-        average_rating = _calculate_average_recipe_rating(existing_model['average_rating'], existing_model['rating_count'],
+        rating_count = 0 if 'rating_count' not in existing_model else existing_model['rating_count']
+        current_avg_rating = 0 if 'average_rating' not in existing_model else existing_model['average_rating']
+
+        average_rating = _calculate_average_recipe_rating(current_avg_rating, rating_count,
                                                    request.get_json()['rating'])
 
         new_params = {'average_rating': average_rating, 'rating_count': rating_count + 1}
