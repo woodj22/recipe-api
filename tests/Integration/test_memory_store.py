@@ -29,7 +29,7 @@ def test_csv_loader_can_load_a_csv_into_memory(create_test_file):
 
     mem = csv_loader(file_path)
 
-    assert list(actual_dict.values()) == list(mem[0].values())
+    assert list(actual_dict.values()) == list(mem[1].values())
 
 
 def test_mem_table_can_retrieve_a_record_by_id(create_test_file):
@@ -60,6 +60,6 @@ def test_mem_table_can_retrieve_an_indexed_list_of_records(create_test_file):
 
     result = recipes.list()
 
-    assert [record_1, record_2, record_3] == result
+    assert [record_1, record_2, record_3] == result['data']
 
 

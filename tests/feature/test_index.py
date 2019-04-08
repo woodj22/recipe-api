@@ -33,10 +33,10 @@ def create_test_file():
 @pytest.fixture
 def client(create_test_file):
     record_1 = {'id': 1, 'recipe_cuisine': 'british', 'average_rating': 3, 'rating_count': 2}
-    record_3 = {'id': 2, 'recipe_cuisine': 'nothllo', 'average_rating': 3, 'rating_count': 2}
-    record_5 = {'id': 3, 'recipe_cuisine': 'british', 'average_rating': 3, 'rating_count': 2}
-    record_2 = {'id': 4, 'recipe_cuisine': 'british', 'average_rating': 3, 'rating_count': 2}
-    record_4 = {'id': 5, 'recipe_cuisine': 'british', 'average_rating': 3, 'rating_count': 2}
+    record_2 = {'id': 2, 'recipe_cuisine': 'nothllo', 'average_rating': 3, 'rating_count': 2}
+    record_3 = {'id': 3, 'recipe_cuisine': 'british', 'average_rating': 3, 'rating_count': 2}
+    record_4 = {'id': 4, 'recipe_cuisine': 'british', 'average_rating': 3, 'rating_count': 2}
+    record_5 = {'id': 5, 'recipe_cuisine': 'british', 'average_rating': 3, 'rating_count': 2}
     file_path = create_test_file(['id', 'recipe_cuisine', 'average_rating', 'rating_count'], [record_1, record_2, record_3, record_4, record_5])
 
     app = create_app({'RECIPE_DATA_FILE_PATH': file_path, 'PAGINATION_LIMIT': 2})
@@ -59,10 +59,28 @@ def test_a_user_can_retrieve_a_paginated_list_of_recipes(client):
         assert record['recipe_cuisine'] == 'british'
 
 
+def test_a_user_can_retrieve_a_paginated_list_of_recipes_without_a_filter(client):
+    response = client.get('/recipes')
+
+    data = json.loads(response.get_data(as_text=True))
+
+    assert len(data['data']) == 2
+
+
+def test_it_can_retrieve_more_page_limit_with_per_page(client):
+    query = '?per_page=4'
+
+    response = client.get('/recipes' + query)
+
+    data = json.loads(response.get_data(as_text=True))
+
+    assert len(data['data']) == 4
+
+
 def test_a_user_can_get_a_page_of_recipes(client):
     query = '?recipe_cuisine=british'
 
-    response = client.get('/recipes/show/2' + query)
+    response = client.get('/recipes/page/2' + query)
 
     data = json.loads(response.get_data(as_text=True))
 
@@ -95,9 +113,10 @@ def test_a_user_can_store_a_new_recipe(client):
 
     data = json.loads(response.get_data(as_text=True))
 
-    assert data['id'] == 6
+    assert data['id'] == 7
     assert data['recipe_cuisine'] == 'asian'
     assert data['carbs_grams'] == 2
+    assert response.status_code == 201
 
 
 def test_a_user_can_add_a_rating_and_returns_recipe_with_new_average(client):
@@ -116,3 +135,14 @@ def test_a_user_can_add_a_rating_and_returns_recipe_with_new_average(client):
     assert data['average_rating'] == expected_average_rating
     assert data['rating_count'] == expected_rating_count
 
+
+def test_a_user_cannot_add_a_rating_over_5_by_returnig_403(client):
+
+    response = client.put('/recipes/2/ratings', json=dict(rating=6))
+    assert response.status_code == 403
+
+
+def test_a_user_cannot_add_a_rating_under_0_by_returnig_403(client):
+
+    response = client.put('/recipes/2/ratings', json=dict(rating=-1))
+    assert response.status_code == 403

@@ -7,50 +7,53 @@ class MemTable:
     memory_list: list
 
     def __init__(self, memory_list):
-        self.memory_list = memory_list[1:]
+        self.memory_list = memory_list
 
     def find(self, index):
         return dict(self.memory_list[index])
 
     def list(self):
-        return {'data': self.memory_list}
+        return {'data': self.memory_list[1:]}
 
     def filter_by(self, filters: dict):
+        """
+        Filter by values present in dictionary. If the filter variable is empty it will not apply any filters.
+        :param filters:
+        :return:
+        """
         filtered_list = []
-
-        for row in self.memory_list:
+        for row in self.memory_list[1:]:
             for filter_key, filter_value in filters.items():
-                if row is None:
-                    print(row)
-
                 if row[filter_key] == filter_value:
                     filtered_list.append(row)
-        self.query = filtered_list
-
+        if not filters:
+            self.query = self.memory_list[1:]
+        else:
+            self.query = filtered_list
         return self
 
-    def paginate(self, page, per_page):
+    def paginate(self, page, per_page, base_url):
         count = len(self.query)
 
         if page == 1:
             page_start = 0
             page_end = per_page
         else:
-            page_start = page * per_page
-            page_end = page_start + per_page
+            page_end = (page * per_page)
+            page_start = (page_end - per_page)
 
         pagination = Pagination(page, per_page, count)
 
         paginationDict = {
-            'data': self.query[page_start:(page_end)],
+            'data': self.query[int(page_start):int(page_end)],
             'pagination': {}
         }
 
         if pagination.has_next:
-            paginationDict['pagination']['nextPage'] = 'recipes/page/' + str(page + 1)
+            paginationDict['pagination']['nextPage'] = base_url + '/page/' + str(page + 1)
 
         if pagination.has_prev:
-            paginationDict['pagination']['prevPage'] = 'recipes/page/' + str(page - 1)
+            paginationDict['pagination']['prevPage'] = base_url + '/page/' + str(page - 1)
 
         return paginationDict
 
@@ -74,6 +77,7 @@ class MemTable:
 
     def _get_next_id(self):
         return len(self.memory_list) + 1
+
 
 class Pagination(object):
 
