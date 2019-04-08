@@ -1,14 +1,14 @@
 
 ### Introduction
 
-An API and temporary data store used for recipe data. I have chosen to use the Flask web framework for this because it is lightweight and easy to get a simple set of endpoints up and running quickly.
+An API and temporary data store used for recipe data. I have chosen to use the Flask web framework for this because it is lightweight and  relatively fast to get an API up and running.
 It can also be deployed to the AWS lambda service easily and be hooked to a API gateway with almost no more overhead. This means the time to production ready is much smaller. 
 
 
 ### Prerequisites
 
 - python >= 3.6
-- venv installed or another environment available that can install packages from a `requirements.txt` file.
+- venv installed or another environment available that can install packages from a `requirements.txt` file
 
 ### Setup
 
@@ -30,7 +30,7 @@ PAGINATION_LIMIT= The default maximum amount of items that can be displayed on o
 
 To make sure it is working run:
  `pytest`
- This will run all the tests. All should be green. See the *deployment* section to run the server. 
+ This will run all the tests. All should be green. See the *deployment* section to run a server to view the live API. 
 
  
 ### Usage
@@ -39,11 +39,11 @@ The work has been split into two parts the API that serves requests and a in mem
 
 #### API
 
- - GET      /recipes - Retrieve a list of paginated recipes. Query parameters are used to filter the response. The per_page parameter is ued to determine the amount of recipes shown on one page.
- - POST     /recipes - Store a new recipe.
- - GET      /recipes/{id} - Retrieve a recipe by ID.
- - POST     /recipes/{id}/ratings - Upload a new recipe rating then calculate and store a new average rating. The rating uploaded must be between 1 and 5.
- - PATCH    /recipes/{id} - Update a recipe.
+ - GET      `/recipes` - Retrieve a list of paginated recipes. Query parameters are used to filter the response. The per_page parameter is ued to determine the amount of recipes shown on one page.
+ - POST     `/recipes` - Store a new recipe.
+ - GET      `/recipes/{id}` - Retrieve a recipe by ID.
+ - POST     `/recipes/{id}/ratings` - Upload a new recipe rating then calculate and store a new average rating. The rating uploaded must be between 1 and 5.
+ - PATCH    `/recipes/{id}` - Update a recipe.
  
 See the *deployment* section below to start a server to hit the endpoints.
 
@@ -55,6 +55,7 @@ From these two values it can calculate the new average with the new request.
 This involves reading a csv file on load and storing the records in memory. All access is controlled via the `MemTable` class. 
 The csv file that originally stores the data is loaded into it when the class is initialized. 
 
+Warning: the data is **NOT** saved when the server is stopped.
 
 ### Testing
 
@@ -81,7 +82,7 @@ If you do not have access to one, one can be found in the `data_logs` folder of 
 
 
 - 500 on root page(/) :
-    This is expected behaviour. Navigate to `/recipes`.
+    This is expected behaviour. Navigate to `/recipes` for live results. 
 
 ### What Next
 
@@ -89,12 +90,12 @@ If you do not have access to one, one can be found in the `data_logs` folder of 
 - Use a more reliable data store.
 - Error handling - Users can have a better experience and fault find themselves. ie 404 errors when a recipe does not exist.
 - API validation - Good protection against malformed data. Particularly useful when the API is powered by an unstructured data store. 
-
+- Persistant data store? see bullet 2
 
 ### Catering for different API consumers
 
 I have added a `per_page` query field into the recipes index endpoint ( `/recipes`). 
 This is so web and mobile can request different amounts of content depending on the screen size of the client. 
 I have seen in some places a `requested_from` query where certain data is selected depending on the client. 
-I think this should be up to the front end to decide what information they need and request the endpoints to be split up if needed. 
+I think this should be up to the front end to decide what information they need and request the endpoints to be split up if the data is seen as to big. 
 
