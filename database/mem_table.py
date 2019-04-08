@@ -72,11 +72,11 @@ class MemTable:
         params['id'] = id
 
         self.memory_list.append(params)
-        print(self.memory_list)
+
         return params
 
     def _get_next_id(self):
-        return len(self.memory_list) + 1
+        return len(self.memory_list)
 
 
 class Pagination(object):

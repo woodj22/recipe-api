@@ -1,7 +1,5 @@
-from math import ceil
 from flask import Flask, abort, render_template
 from flask import request
-from flask import Response
 from database.filetypes import csv_loader
 from database.mem_table import MemTable
 import json
@@ -74,7 +72,7 @@ def create_app(test_config=None):
         if request.get_json()['rating'] > 5 or request.get_json()['rating'] < 0:
             return '', 403
 
-        average_rating = _calculate_average_rating(existing_model['average_rating'], existing_model['rating_count'],
+        average_rating = _calculate_average_recipe_rating(existing_model['average_rating'], existing_model['rating_count'],
                                                    request.get_json()['rating'])
 
         new_params = {'average_rating': average_rating, 'rating_count': rating_count + 1}
@@ -83,7 +81,7 @@ def create_app(test_config=None):
 
         return json.dumps(updated_recipe)
 
-    def _calculate_average_rating(current_avg_rating, current_rating_count, new_rating):
+    def _calculate_average_recipe_rating(current_avg_rating, current_rating_count, new_rating):
         rating_total = (current_avg_rating * current_rating_count) + new_rating
 
         average_rating = rating_total / (current_rating_count + 1)
