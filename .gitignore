@@ -34,3 +34,4 @@ MANIFEST
 *.spec
 
 config.py
+venv/

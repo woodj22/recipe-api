@@ -103,9 +103,8 @@ def test_a_user_can_get_a_recipe_by_id(client):
 
     data = json.loads(response.get_data(as_text=True))
     for key, value in record_2.items():
-
-        assert data[key] == value
-    assert data['id'] == 2
+        assert data['data'][key] == value
+    assert data['data']['id'] == 2
 
 
 def test_a_user_can_update_a_recipe_by_id_and_returns_correct_value(client):
@@ -114,8 +113,8 @@ def test_a_user_can_update_a_recipe_by_id_and_returns_correct_value(client):
 
     data = json.loads(response.get_data(as_text=True))
 
-    assert data['id'] == 2
-    assert data['recipe_cuisine'] == new_recipe_cuisine
+    assert data['data']['id'] == 2
+    assert data['data']['recipe_cuisine'] == new_recipe_cuisine
 
 
 def test_a_user_can_store_a_new_recipe(client):
@@ -123,9 +122,9 @@ def test_a_user_can_store_a_new_recipe(client):
 
     data = json.loads(response.get_data(as_text=True))
 
-    assert data['id'] == 6
-    assert data['recipe_cuisine'] == 'asian'
-    assert data['carbs_grams'] == 2
+    assert data['data']['id'] == 6
+    assert data['data']['recipe_cuisine'] == 'asian'
+    assert data['data']['carbs_grams'] == 2
     assert response.status_code == 201
 
 
@@ -142,8 +141,8 @@ def test_a_user_can_add_a_rating_and_returns_recipe_with_new_average_rating(clie
 
     data = json.loads(response.get_data(as_text=True))
 
-    assert data['average_rating'] == expected_average_rating
-    assert data['rating_count'] == expected_rating_count
+    assert data['data']['average_rating'] == expected_average_rating
+    assert data['data']['rating_count'] == expected_rating_count
 
 
 def test_a_user_cannot_add_a_rating_over_5_by_returning_403(client):

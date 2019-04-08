@@ -47,7 +47,7 @@ def create_app(test_config=None):
         if not recipe:
             return '', 404
 
-        return json.dumps(recipe)
+        return json.dumps({'data': recipe})
 
     @app.route('/recipes/<int:id>', methods=['patch'])
     def update(id):
@@ -56,13 +56,13 @@ def create_app(test_config=None):
         if not updated_recipe:
             return '', 404
 
-        return json.dumps(updated_recipe)
+        return json.dumps({'data': updated_recipe})
 
     @app.route('/recipes', methods=['post'])
     def create():
         params = request.get_json()
 
-        return json.dumps(recipe_model.store(params)), 201
+        return json.dumps({'data': recipe_model.store(params)}), 201
 
     @app.route('/recipes/<int:id>/ratings', methods=['post'])
     def update_rating(id):
@@ -86,7 +86,7 @@ def create_app(test_config=None):
 
         updated_recipe = recipe_model.update(id, new_params)
 
-        return json.dumps(updated_recipe)
+        return json.dumps({'data': updated_recipe})
 
     def _calculate_average_recipe_rating(current_avg_rating, current_rating_count, new_rating):
         rating_total = (current_avg_rating * current_rating_count) + new_rating
@@ -99,7 +99,7 @@ def create_app(test_config=None):
         filters = {}
         for v in allowed_recipe_filters:
             if v in queries:
-                filters = {v: request.args.get(v)}
+                filters[v] = request.args.get(v)
 
         return filters
 

@@ -1,3 +1,4 @@
+import time
 from math import ceil
 from typing import Optional, List, Any
 
@@ -13,7 +14,7 @@ class MemTable:
         return dict(self.memory_list[index])
 
     def list(self):
-        return {'data': self.memory_list[1:]}
+        return self.memory_list[1:]
 
     def filter_by(self, filters: dict):
         """
@@ -26,46 +27,45 @@ class MemTable:
             for filter_key, filter_value in filters.items():
                 if row[filter_key] == filter_value:
                     filtered_list.append(row)
+                    continue
         if not filters:
             self.query = self.memory_list[1:]
         else:
             self.query = filtered_list
         return self
 
-    def paginate(self, page: int, per_page: int, base_url):
+    def paginate(self, page, per_page, base_url):
         count = len(self.query)
 
-        if page == 1:
-            page_start = 0
-            page_end = per_page
-        else:
-            page_end = (int(page) * int(per_page))
-            page_start = (int(page_end) - int(per_page))
+        page_end = (int(page) * int(per_page))
+        page_start = (int(page_end) - int(per_page))
 
         pagination = Pagination(page, per_page, count)
 
-        paginationDict = {
-            'data': self.query[int(page_start):int(page_end)],
-            'pagination': {}
+        pagination_dict = {
+        'data': self.query[int(page_start):int(page_end)],
+        'pagination': {}
         }
 
         if pagination.has_next:
-            paginationDict['pagination']['nextPage'] = base_url + '/page/' + str(page + 1)
+            pagination_dict['pagination']['nextPage'] = base_url + '/page/' + str(page + 1)
 
         if pagination.has_prev:
-            paginationDict['pagination']['prevPage'] = base_url + '/page/' + str(page - 1)
+            pagination_dict['pagination']['prevPage'] = base_url + '/page/' + str(page - 1)
 
-        return paginationDict
+        return pagination_dict
+
 
     def update(self, index, params: dict):
         new_row = self.find(index)
         for filter_key, filter_value in params.items():
             # if filter_key in new_row:
-                new_row[filter_key] = filter_value
+            new_row[filter_key] = filter_value
 
         self.memory_list[index] = new_row
 
         return new_row
+
 
     def store(self, params: dict):
         id = self._get_next_id()
@@ -74,6 +74,7 @@ class MemTable:
         self.memory_list.append(params)
 
         return params
+
 
     def _get_next_id(self):
         return len(self.memory_list)

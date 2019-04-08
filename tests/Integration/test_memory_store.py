@@ -60,7 +60,7 @@ def test_mem_table_can_retrieve_an_indexed_list_of_records(create_test_file):
 
     result = recipes.list()
 
-    assert [record_1, record_2, record_3] == result['data']
+    assert [record_1, record_2, record_3] == result
 
 
 def test_mem_table_can_store_new_record(create_test_file):
